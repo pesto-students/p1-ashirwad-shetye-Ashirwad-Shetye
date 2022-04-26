@@ -1,9 +1,8 @@
 
-
 //array of cities
-/*
-let cityNames = ["Mumbai CSMT", "Madgaon", ""]
-*/
+
+let cityNames = ["Mumbai CSMT", "Madgaon", "Pune Junction"]
+
 
 
 //create function to apply 
@@ -25,8 +24,8 @@ const train_2 = {
 }
 
 
-let train_1_Route = trainRoute.route.apply(train_1, ["Mumbai CSMT", "Madgaon"]);
-let train_2_Route = trainRoute.route.apply(train_2, ["Mumbai CSMT", "Pune Junction"]);
+let train_1_Route = trainRoute.route.apply(train_1, [cityNames[0], cityNames[1]]);
+let train_2_Route = trainRoute.route.apply(train_2, [cityNames[0], cityNames[2]]);
 
 console.log(train_1_Route);
 console.log(train_2_Route);

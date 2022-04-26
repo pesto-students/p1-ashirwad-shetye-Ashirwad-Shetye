@@ -1,7 +1,10 @@
 function createIncrement() {
     let count = 0;
     function increment() {
-        count++;
+        count++;   //count = 0
+        /*since the operator is postfix,the increment operator increments 
+          and returns the value before incrementing
+        */
     }
     let message= `Count is ${count}`;
     function log() {
@@ -11,9 +14,9 @@ function createIncrement() {
 
     return [increment, log];
     }
+    
     const [increment, log] = createIncrement();
     increment();
     increment();
     increment();
-    log();
-    // What is logged?
+    log(); // output is "Count is 0"
