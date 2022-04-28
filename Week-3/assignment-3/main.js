@@ -15,8 +15,8 @@ function createIncrement() {
     return [increment, log];
     }
     
-    const [increment, log] = createIncrement();
-    increment();
-    increment();
-    increment();
-    log(); // output is "Count is 0"
+const [increment, log] = createIncrement();
+increment();
+increment();
+increment();
+log(); // output is "Count is 0"
