@@ -22,5 +22,5 @@ const fibonacci_num = (n) => ({
 });
 
 
-console.log([...fibonacci_num(8)]);  // gives an array of n fibonacci numbers.
+console.log([0,...fibonacci_num(8)]);  // gives an array of n fibonacci numbers.
 
