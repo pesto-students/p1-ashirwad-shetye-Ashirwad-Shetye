@@ -46,10 +46,20 @@ function memoize_factorial(n) {
         return cache[n] = n * factorial(n-1);
     }
 
+    // function roundTo(n, digits) {
+    //     if (digits === undefined) {
+    //         digits = 0;
+    //     }
+    //     var multiplicator = Math.pow(10, digits);
+    //     n = parseFloat((n * multiplicator).toFixed(11));
+    //     return Math.round(n) / multiplicator;
+    // }
+
     console.timeEnd(`time`);
         
     output = factorial(n); // want result = output.tofixed(4);
-    result = Math.round(output * 100) / 100;
+    // result = roundTo(output, 4);
+    // result = Math.round(output * 100) / 100;
     return result;
 }
 
