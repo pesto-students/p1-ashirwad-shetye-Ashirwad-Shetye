@@ -1,89 +1,215 @@
-
 const STATE = {
-    FULLFILLED: 'fullfilled',
-    REJECTED: 'rejected',
-    PENDING: 'pending'
-}
-
-class poly_Promise {
-    #then_callback = []                                 
-    #catch_callback = []                                 //storing callback for further use
-    #state = STATE.PENDING                              //initial state of promise
+    //declaring stages of the promise
+    FULFILLED: "fulfilled",
+    REJECTED: "rejected",
+    PENDING: "pending",
+  }
+  
+  class MyPromise {
+    #thenCbs = []           //array of callbacks to be called when promise is fulfilled
+    #catchCbs = []          //array of callbacks to be called when promise is rejected
+    #state = STATE.PENDING
     #value
-    #onSuccessBinded = this.#onSuccessBinded.bind(this)
-    #onFailureBinded = this.#onFailureBinded.bind(this)
-
-    constructor(callback) {
-        try {
-            callback(this.#onSuccess, this.#onFailureBind)
-        } catch (error) {
-            this.#onFailure(error)
-        }
+    #onSuccessBind = this.#onSuccess.bind(this)
+    #onFailBind = this.#onFail.bind(this)
+  
+    constructor(cb) {
+      try {
+        cb(this.#onSuccessBind, this.#onFailBind)
+      } catch (e) {
+        this.#onFail(e)
+      }
     }
-
-    #runCallback(){                                     //running all callbacks
-        if (this.#state === STATE.FULLFILLED) {         //when successful
-            this.#then_callback.forEach(callback => {
-                callback(this.#value)                   //promise is saving a value in a state as fullfilled.
-                                                        // we take that value to call all of our .then()
-            })
-
-            this.#then_callback = []                    //clearing previous callbacks when multiple .then() are called
-        }
-
-        if (this.#state === STATE.REJECTED) {           //when failed
-            this.catch_callback.forEach(callback => {
-                callback(this.#value)                   //promise is saving a value in a state as rejected.
-                                                        // we take that value to call all of our .then()
-            })
-
-            this.#catch_callback = []                    //clearing previous callbacks when multiple .then() are called
-        }
-
+  
+    #runCallbacks() {
+      if (this.#state === STATE.FULFILLED) {
+        this.#thenCbs.forEach(callback => {
+          callback(this.#value)
+        })
+  
+        this.#thenCbs = []
+      }
+  
+      if (this.#state === STATE.REJECTED) {
+        this.#catchCbs.forEach(callback => {
+          callback(this.#value)
+        })
+  
+        this.#catchCbs = []
+      }
     }
-
+  
     #onSuccess(value) {
-        if(this.#state !== STATE.PENDING) return
+      queueMicrotask(() => {
+        if (this.#state !== STATE.PENDING) return
+  
+        if (value instanceof MyPromise) {
+          value.then(this.#onSuccessBind, this.#onFailBind)
+          return
+        }
+  
         this.#value = value
-        this.#state = STATE.FULLFILLED
-        this.#runCallback()
+        this.#state = STATE.FULFILLED
+        this.#runCallbacks()
+      })
     }
-
-    #onFailure(value){
-        if(this.#state !== STATE.PENDING) return
+  
+    #onFail(value) {
+      queueMicrotask(() => {
+        if (this.#state !== STATE.PENDING) return
+  
+        if (value instanceof MyPromise) {
+          value.then(this.#onSuccessBind, this.#onFailBind)
+          return
+        }
+  
+        if (this.#catchCbs.length === 0) {
+          throw new UncaughtPromiseError(value)
+        }
+  
         this.#value = value
         this.#state = STATE.REJECTED
-        this.#runCallback()
+        this.#runCallbacks()
+      })
     }
-
-    then(callback){
-        if (then_callback != null) this.#then_callback.push(callback) 
-        if (catch_callback != null) this.#catch_callback.push(callback)
-
-       this.#runCallback()                              //to immediately run the callback when .then() is called
-
+  
+    then(thenCb, catchCb) {
+      return new MyPromise((resolve, reject) => {
+        this.#thenCbs.push(result => {
+          if (thenCb == null) {
+            resolve(result)
+            return
+          }
+  
+          try {
+            resolve(thenCb(result))
+          } catch (error) {
+            reject(error)
+          }
+        })
+  
+        this.#catchCbs.push(result => {
+          if (catchCb == null) {
+            reject(result)
+            return
+          }
+  
+          try {
+            resolve(catchCb(result))
+          } catch (error) {
+            reject(error)
+          }
+        })
+  
+        this.#runCallbacks()
+      })
     }
-
-    catch(callback){
-        this.then(undefined, callback)
+  
+    catch(cb) {
+      return this.then(undefined, cb)
     }
-
-    finally(callback){
-        this.#finally_callback.push(callback)
+  
+    finally(cb) {
+      return this.then(
+        result => {
+          cb()
+          return result
+        },
+        result => {
+          cb()
+          throw result
+        }
+      )
     }
-}
+  
+    static resolve(value) {
+      return new Promise(resolve => {
+        resolve(value)
+      })
+    }
+  
+    static reject(value) {
+      return new Promise((resolve, reject) => {
+        reject(value)
+      })
+    }
+  
+    static all(promises) {
+      const results = []
+      let completedPromises = 0
+      return new MyPromise((resolve, reject) => {
+        for (let i = 0; i < promises.length; i++) {
+          const promise = promises[i]
+          promise
+            .then(value => {
+              completedPromises++
+              results[i] = value
+              if (completedPromises === promises.length) {
+                resolve(results)
+              }
+            })
+            .catch(reject)
+        }
+      })
+    }
+  
+    static allSettled(promises) {
+      const results = []
+      let completedPromises = 0
+      return new MyPromise(resolve => {
+        for (let i = 0; i < promises.length; i++) {
+          const promise = promises[i]
+          promise
+            .then(value => {
+              results[i] = { status: STATE.FULFILLED, value }
+            })
+            .catch(reason => {
+              results[i] = { status: STATE.REJECTED, reason }
+            })
+            .finally(() => {
+              completedPromises++
+              if (completedPromises === promises.length) {
+                resolve(results)
+              }
+            })
+        }
+      })
+    }
+  
+    static race(promises) {
+      return new MyPromise((resolve, reject) => {
+        promises.forEach(promise => {
+          promise.then(resolve).catch(reject)
+        })
+      })
+    }
+  
+    static any(promises) {
+      const errors = []
+      let rejectedPromises = 0
+      return new MyPromise((resolve, reject) => {
+        for (let i = 0; i < promises.length; i++) {
+          const promise = promises[i]
+          promise.then(resolve).catch(value => {
+            rejectedPromises++
+            errors[i] = value
+            if (rejectedPromises === promises.length) {
+              reject(new AggregateError(errors, "All promises were rejected"))
+            }
+          })
+        }
+      })
+    }
+  }
+  
+  class UncaughtPromiseError extends Error {
+    constructor(error) {
+      super(error)
+  
+      this.stack = `(in promise) ${error.stack}`
+    }
+  }
+
+  
 
 
-
-
-//--------------------------------------------------------------------//
-
-const p = new poly_Promise((resolve, reject) =>{
-    //code
-    resolve("Hello")
-    reject("Error")
-}).then(() => {
-
-}).catch(() => {
-
-})
