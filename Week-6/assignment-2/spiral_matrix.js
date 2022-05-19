@@ -16,22 +16,22 @@ var spiralorder = function(matrix){
      //creating a while loop to run until result array is equal to size of 2d array
      while(result.length < size){
 
-        for(let i = left; i <= right && result.length < size; i++){
+        for(let i = left; i <= right && result.length < size; i++){              //iterating through left to right
            result.push(matrix[top][i]);
         }
         top++;
 
-        for(let i = top; i <= bottom && result.length < size; i++){
+        for(let i = top; i <= bottom && result.length < size; i++){              //iterating through top to bottom
            result.push(matrix[i][right]);
         }
         right--;
 
-        for(let i = right; i >= left && result.length < size; i--){
+        for(let i = right; i >= left && result.length < size; i--){              //iterating through right to left
            result.push(matrix[bottom][i]);
         }
         bottom--;
 
-        for(let i = bottom; i >= top && result.length < size; i--){
+        for(let i = bottom; i >= top && result.length < size; i--){              //iterating through bottom to top
            result.push(matrix[i][left]);
         }
         left++;
