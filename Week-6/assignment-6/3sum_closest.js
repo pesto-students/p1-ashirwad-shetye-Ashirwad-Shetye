@@ -31,4 +31,4 @@ function threeSumClosest(array, target) {
     return result;
 };
 
-console.log(threeSumClosest([-1, 2, 1, -4], 1));
+console.log(threeSumClosest([-1, 2, 1, -4], -2));
