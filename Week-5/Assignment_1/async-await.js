@@ -1,21 +1,21 @@
 
 //function to execute
 
-function doTask1(val) {
+function task1(val) {
   setTimeout(() => {
-    console.log(`Task 1 Done with value ${val}!`);
+  console.log(`Task 1 Done with value ${val}!`);
   }, 3000);
 }
 
-function doTask2(val) {
+function task2(val) {
   setTimeout(() => {
-    console.log(`Task 2 Done with value ${val}!`);
+  console.log(`Task 2 Done with value ${val}!`);
   }, 5000);
 }
 
-function doTask3(val) {
+  function task3(val) {
   setTimeout(() => {
-    console.log(`Task 3 Done with value ${val}!`);
+  console.log(`Task 3 Done with value ${val}!`);
   }, 4000);
 }
 
@@ -34,13 +34,13 @@ async function asyncFunction() {
 let executeAsyncFunction = asyncFunction();
 executeAsyncFunction
   .then((val) => {
-    doTask1(val);
+    task1(val);
     return val + 2;
   })
   .then((val) => {
-    doTask2(val);
+    task2(val);
     return val * 3;
   })
   .then((val) => {
-    doTask3(val);
+    task3(val);
   });
